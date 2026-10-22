@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 智能体部署工作室 — 微信 AI 客服</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #0f1117; color: #e8eaf0; line-height: 1.7;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 24px 20px 60px; }
+
+  header { text-align: center; padding: 48px 0 24px; }
+  header h1 { font-size: 2rem; margin-bottom: 12px; background: linear-gradient(90deg,#4f8cff,#a56bff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  header p { color: #9aa0b4; font-size: 1.05rem; }
+
+  .demo-box {
+    display: flex; flex-wrap: wrap; gap: 32px; align-items: flex-start;
+    justify-content: center; margin: 40px 0;
+  }
+
+  /* 手机壳 */
+  .phone {
+    width: 300px; min-height: 480px; background: #1c1f2b;
+    border: 8px solid #2a2e3f; border-radius: 36px;
+    padding: 14px 10px; box-shadow: 0 12px 40px rgba(0,0,0,.5);
+    display: flex; flex-direction: column;
+  }
+  .phone .titlebar { text-align: center; padding: 6px 0 12px; font-weight: 600; color: #cfd4e4; font-size: .95rem; border-bottom: 1px solid #2a2e3f; margin-bottom: 12px; }
+  .chat { flex: 1; overflow: hidden; display: flex; flex-direction: column; gap: 12px; }
+  .msg { max-width: 80%; padding: 10px 14px; border-radius: 14px; font-size: .88rem; }
+  .msg.user { align-self: flex-end; background: #3b6cf5; color: #fff; border-bottom-right-radius: 4px; }
+  .msg.bot { align-self: flex-start; background: #2a2e3f; color: #dfe3f0; border-bottom-left-radius: 4px; }
+  .inputbar { margin-top: 12px; display: flex; gap: 8px; }
+  .inputbar input {
+    flex: 1; background: #2a2e3f; border: none; border-radius: 20px;
+    padding: 10px 14px; color: #e8eaf0; font-size: .85rem; outline: none;
+  }
+  .inputbar button {
+    background: #3b6cf5; color: #fff; border: none; border-radius: 20px;
+    padding: 10px 16px; font-size: .85rem; cursor: pointer;
+  }
+  .typing { display: inline-block; }
+  .typing i { display: inline-block; width: 6px; height: 6px; background: #8b93ad; margin-left: 3px; border-radius: 50%; animation: blink 1s infinite; }
+  .typing i:nth-child(2){ animation-delay: .2s } .typing i:nth-child(3){ animation-delay: .4s }
+  @keyframes blink { 0%,80%,100%{ opacity: .3 } 40%{ opacity: 1 } }
+
+  .info-col { flex: 1; min-width: 280px; }
+  .info-col h2 { font-size: 1.25rem; margin: 20px 0 8px; color: #cfd4e4; }
+  .info-col ul { padding-left: 18px; color: #9aa0b4; }
+  .info-col li { margin-bottom: 6px; }
+
+  .pricing { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin: 32px 0; }
+  .card { background: #1c1f2b; border: 1px solid #2a2e3f; border-radius: 16px; padding: 20px; }
+  .card h3 { color: #cfd4e4; font-size: 1rem; margin-bottom: 8px; }
+  .card .price { font-size: 1.6rem; font-weight: 700; color: #4f8cff; margin-bottom: 8px; }
+  .card .price small { font-size: .8rem; color: #9aa0b4; font-weight: 400; }
+  .card p { color: #9aa0b4; font-size: .9rem; }
+
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin: 32px 0; }
+  .step { background: #1c1f2b; border: 1px solid #2a2e3f; border-radius: 14px; padding: 16px; text-align: center; }
+  .step .n { font-size: 1.5rem; font-weight: 700; color: #a56bff; }
+  .step p { color: #cfd4e4; font-size: .9rem; margin-top: 6px; }
+
+  .contact { text-align: center; margin: 48px 0 20px; }
+  .contact .cta {
+    display: inline-block; background: linear-gradient(90deg,#3b6cf5,#a56bff);
+    color: #fff; font-size: 1.1rem; font-weight: 600;
+    padding: 14px 36px; border-radius: 30px; text-decoration: none;
+  }
+  .contact p { color: #9aa0b4; margin-top: 14px; font-size: .9rem; }
+
+  footer { text-align: center; color: #555c75; font-size: .8rem; padding: 30px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>AI 智能体部署工作室</h1>
+  <p>个人开发者 · 专注 AI 客服 / 智能体落地 · 48 小时上线</p>
+</header>
+
+<div class="demo-box">
+  <div class="phone">
+    <div class="titlebar">微信 AI 客服 · 演示</div>
+    <div class="chat" id="chat">
+      <div class="msg bot">您好，我是「小店助手」🤖<br>请问有什么可以帮您？</div>
+    </div>
+    <div class="inputbar">
+      <input id="q" placeholder="试试问：你们的营业时间？" />
+      <button onclick="ask()">发送</button>
+    </div>
+  </div>
+
+  <div class="info-col">
+    <h2>这是什么？</h2>
+    <p style="color:#9aa0b4">一个可以直接接入微信小程序 / 公众号的 AI 客服智能体。客户在微信里像跟真人聊天一样提问，它 7×24 小时自动回复，复杂问题转人工。</p>
+    <h2>我能帮你做什么？</h2>
+    <ul>
+      <li>微信 AI 客服 / 公众号自动回复</li>
+      <li>企业微信、钉钉智能体定制</li>
+      <li>行业知识库接入（产品、政策、FAQ）</li>
+      <li>部署 + 调试 + 交付，含使用培训</li>
+    </ul>
+    <h2>上方演示</h2>
+    <p style="color:#9aa0b4">左侧是真实交互演示，试试输入「营业时间」或「怎么退款」。</p>
+  </div>
+</div>
+
+<h2 style="text-align:center; margin:20px 0 6px;">服务报价</h2>
+<div class="pricing">
+  <div class="card">
+    <h3>基础版</h3>
+    <div class="price">¥1,500 <small>起</small></div>
+    <p>单渠道（微信）AI 客服<br>知识库 ≤ 500 条 · 48h 上线</p>
+  </div>
+  <div class="card">
+    <h3>标准版</h3>
+    <div class="price">¥3,800 <small>起</small></div>
+    <p>多渠道（微信+企微+网页）<br>知识库 ≤ 2000 条 · 定制话术</p>
+  </div>
+  <div class="card">
+    <h3>定制版</h3>
+    <div class="price">面议</div>
+    <p>私有化部署 / 多智能体协作<br>接入自有数据源 · 专属开发</p>
+  </div>
+</div>
+
+<h2 style="text-align:center; margin:20px 0 6px;">合作流程</h2>
+<div class="steps">
+  <div class="step"><div class="n">1</div><p>需求沟通<br>（30 分钟）</p></div>
+  <div class="step"><div class="n">2</div><p>方案 + 报价<br>（1 天内）</p></div>
+  <div class="step"><div class="n">3</div><p>开发部署<br>（2-5 天）</p></div>
+  <div class="step"><div class="n">4</div><p>验收 + 培训<br>（1 天）</p></div>
+</div>
+
+<div class="contact">
+  <a class="cta" href="https://wa.me/15550000000">💬 微信 / 手机：155-5555-0000（占位）</a>
+  <p>扫码或加我，说明「AI 客服」即可 · 支持先做 1 个 demo 再决定</p>
+</div>
+
+<footer>© 2026 AI 智能体部署工作室 · 个人开发者接单 · 支持验收后付款</footer>
+</div>
+
+<script>
+// 简单知识库演示
+const KB = {
+  营业: '我们每天早上 9:00 到晚上 22:00 营业，节假日不休哦~',
+  退款: '退款很简单：订单页点「申请退款」，24 小时内原路退回，大额退款 1-3 个工作日到账。',
+  价格: '您看中的这款基础款 99 元，现在是活动价 79 元，下单立减 20 元~',
+  地址: '店地址是 XX 市 XX 区科技路 88 号，地铁 3 号线直达，门口有停车。',
+};
+const chat = document.getElementById('chat');
+function ask(){
+  const q = document.getElementById('q').value.trim();
+  if(!q) return;
+  chat.innerHTML += '<div class="msg user"></div>';
+  chat.lastElementChild.textContent = q;
+  document.getElementById('q').value = '';
+  chat.innerHTML += '<div class="msg bot"><span class="typing"><i></i><i></i><i></i></span></div>';
+  chat.lastElementChild.scrollTop = 0;
+  const typingMsg = chat.lastElementChild;
+  chat.scrollTo(0, chat.scrollHeight);
+  setTimeout(()=>{
+    let ans = '这个问题我不太确定，已帮您转接人工客服，稍等片刻~（演示：这里可接入您的知识库或转人工）';
+    for(const k in KB){ if(q.includes(k)){ ans = KB[k]; break; } }
+    typingMsg.textContent = ans;
+    chat.scrollTo(0, chat.scrollHeight);
+  }, 1200);
+}
+document.getElementById('q').addEventListener('keydown', e=>{ if(e.key==='Enter') ask(); });
+</script>
+</body>
+</html>
